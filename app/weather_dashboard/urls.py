@@ -1,10 +1,12 @@
 from django.urls import path
 
-from .views import DailyWeatherSummaryView
+from .views import DailyWeatherSummaryView, AlertThresholdsView, WeatherUpdateStreamView
 
 app_name = "users"
 
 urlpatterns = [
-    path('weather/daily-summary/stream', DailyWeatherSummaryView.as_view(), name='daily_weather_summary'),
-    # path('weather/alerts/stream/', sse_alert_stream, name='sse_alert_stream'),
+    path('weather/daily-summary/stream', DailyWeatherSummaryView.as_view()),
+    path('weather/alerts/stream/', AlertThresholdsView.as_view()),
+    path('weather-updates/stream/', WeatherUpdateStreamView.as_view()),
+
 ]
