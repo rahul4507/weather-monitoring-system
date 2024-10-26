@@ -9,31 +9,30 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-from os import environ
 from pathlib import Path
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
+environ.Env.read_env(str(BASE_DIR / ".env"))
+
 env = environ.Env()
 
-READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=False)
-if READ_DOT_ENV_FILE:
-    # OS environment variables take precedence over variables from ..env
-    env.read_env(str(BASE_DIR / ".env"))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-*6-b5a!!nnrilxy76ur=$^cy(0+rj^(&yh02w4n0&obem#c-n-"
+SECRET_KEY = env('SECRET_KEY', default="django-insecure-*6-b5a!!nnrilxy76ur=$^cy(0+rj^(&yh02w4n0&obem#c-n-")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', default=True)
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
 # Application definition
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -42,6 +41,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
+    "django_q",
+
     "rest_framework",
     "weather_dashboard"
 ]
@@ -54,6 +56,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "app.urls"
@@ -76,18 +79,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "app.wsgi.application"
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
     "default": env.db(
         "DATABASE_URL",
-            default="postgresql://postgres:rahul@localhost:5432/weatherdata_store",
+        default='sqlite:///db.sqlite3',
     ),
 }
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -107,7 +107,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -119,7 +118,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
@@ -129,3 +127,23 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Retrieve API_KEY and CITIES from the environment
+API_URL = 'http://api.openweathermap.org/data/2.5/weather'
+API_KEY = env('API_KEY')  # OpenWeatherMap API key
+CITIES = env.list('CITIES', default=['Delhi', 'Mumbai', 'Chennai', 'Bangalore', 'Kolkata', 'Hyderabad'])
+INTERVAL = env("INTERVAL", default=5)
+SSE_DELAY = env("SSE_DELAY", default=1)
+
+
+# Django Q configuration
+Q_CLUSTER = {
+    'name': 'DjangoQ',
+    'workers': 4,  # Number of worker processes
+    'recycle': 500,  # Recycle workers after this many tasks
+    'timeout': 60,  # Timeout for a single task
+    'django_redis': 'default',
+    'scheduler': 'django_q.schedule',
+    'bulk': 10,  # Bulk tasks for efficiency
+    'orm': 'default',  # Use Django ORM
+}

@@ -1,14 +1,15 @@
 from rest_framework import serializers
-from .models import DailySummary, City
+from .models import DailySummary
 
-class CitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = City
-        fields = ['id', 'name']
 
 class DailySummarySerializer(serializers.ModelSerializer):
-    city = CitySerializer()  # Nested serializer to include city details
+    city_name = serializers.CharField(source='city.name')
+    date = serializers.SerializerMethodField()
 
     class Meta:
         model = DailySummary
-        fields = ['city', 'date', 'avg_temp', 'max_temp', 'min_temp', 'dominant_weather']
+        fields = ['city_name', 'date', 'avg_temp', 'min_temp', 'max_temp', 'dominant_weather']
+
+    def get_date(self, obj):
+        # Format the date as "Month day, Year" (e.g., "October 26, 2024")
+        return obj.date.strftime("%B %d, %Y %H:%M:%S")

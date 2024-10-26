@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import WeatherUpdate, City, DailySummary, UserPreference, Alert
+
+admin.site.register(WeatherUpdate)
+admin.site.register(City)
+admin.site.register(DailySummary)
+admin.site.register(UserPreference)
+admin.site.register(Alert)

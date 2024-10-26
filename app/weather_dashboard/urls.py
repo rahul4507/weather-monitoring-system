@@ -1,12 +1,10 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
-from .views import DailySummaryViewSet
+from .views import DailyWeatherSummaryView
 
 app_name = "users"
-router = DefaultRouter()
-router.register(r'weather/daily-summaries/', DailySummaryViewSet, basename='rule')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('weather/daily-summary/stream', DailyWeatherSummaryView.as_view(), name='daily_weather_summary'),
+    # path('weather/alerts/stream/', sse_alert_stream, name='sse_alert_stream'),
 ]
